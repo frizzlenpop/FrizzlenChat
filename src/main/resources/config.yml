@@ -33,8 +33,8 @@ channels:
 private-messages:
   enabled: true
   format:
-    send: "&7[&dMe &7-> &d{recipient}&7] &f{message}"
-    receive: "&7[&d{sender} &7-> &dMe&7] &f{message}"
+    send: "&7[&dMe &7-> &d{player}&7] &f{message}"
+    receive: "&7[&d{player} &7-> &dMe&7] &f{message}"
   sound:
     enabled: true
     name: "ENTITY_EXPERIENCE_ORB_PICKUP"
@@ -74,17 +74,64 @@ chat-features:
     lines: 100
     message: "&aChat has been cleared by {player}"
 
+# Mute settings
+mute:
+  broadcast-to-staff: true
+  default-duration: 60  # minutes
+  message: "&cYou are muted. Reason: {reason}"
+
 # Message formats
 formats:
   no-permission: "&cYou don't have permission to do that!"
   player-only: "&cThis command can only be used by players!"
   player-not-found: "&cPlayer not found!"
+  invalid-usage: "&cInvalid usage! Please check /help for the correct usage."
+  invalid-duration: "&cInvalid duration! Please use a positive number."
+  invalid-color: "&cInvalid color! Available colors: &fwhite&c, &7gray&c, &0black&c, &4dark_red&c, &cred&c, &6gold&c, &eyellow&c, &2dark_green&c, &agreen&c, &baqua&c, &3dark_aqua&c, &1dark_blue&c, &9blue&c, &5dark_purple&c, &dlight_purple"
+  
+  # Channel messages
   invalid-channel: "&cThat channel does not exist!"
   channel-join: "&aYou have joined the {channel} channel."
   channel-leave: "&aYou have left your current channel and joined {channel}."
   channel-list-header: "&aAvailable channels:"
   channel-list-format: "{color}{channel}{current}"
   channel-current-suffix: " &e(Current)"
+  
+  # Private message formats
+  no-reply-target: "&cYou have no one to reply to!"
+  
+  # Ignore system messages
+  player-ignored: "&aYou are now ignoring {player}."
+  player-unignored: "&aYou are no longer ignoring {player}."
+  already-ignored: "&cYou are already ignoring {player}."
+  not-ignored: "&cYou are not ignoring {player}."
+  cannot-ignore-self: "&cYou cannot ignore yourself!"
+  cannot-ignore-player: "&cYou cannot ignore this player!"
+  ignore-list-empty: "&aYou are not ignoring anyone."
+  ignore-list-header: "&aPlayers you are ignoring:"
+  ignore-list-format: "&7- &c{player}"
+  
+  # Mute system messages
+  player-muted: "&c{player} has been muted for {duration} minutes. Reason: {reason}"
+  player-unmuted: "&a{player} has been unmuted."
+  you-are-muted: "&cYou have been muted for {duration} minutes. Reason: {reason}"
+  you-are-unmuted: "&aYou have been unmuted."
+  player-not-muted: "&c{player} is not muted!"
+  cannot-mute-player: "&cYou cannot mute this player!"
+  mute-list-empty: "&aThere are no muted players."
+  mute-list-header: "&cMuted players:"
+  mute-list-format: "&7- &c{player} &7({duration}m remaining) - {reason}"
+  
+  # Chat color messages
+  chatcolor-set: "&aYour chat color has been set to {color}."
+  chatcolor-removed: "&aYour chat color has been removed."
+  
+  # Broadcast messages
+  broadcast-format: "&c[Broadcast] &f{message}"
+  
+  # Slowmode messages
+  slowmode-enabled: "&cSlow mode has been enabled. You must wait {duration} seconds between messages."
+  slowmode-disabled: "&aSlow mode has been disabled."
 
 # Debug settings
 debug:

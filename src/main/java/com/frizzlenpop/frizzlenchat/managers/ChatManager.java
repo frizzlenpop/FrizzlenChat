@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.lang.reflect.Method;
 
 public class ChatManager {
     private final FrizzlenChat plugin;
@@ -22,6 +23,17 @@ public class ChatManager {
     private final Pattern mentionPattern;
     private final Map<UUID, Long> lastMessageTime;
     
+    // Cache for FrizzlenPerms reflection
+    private Class<?> permsClass;
+    private Method getInstance;
+    private Method getUserManager;
+    private Method getUser;
+    private Method getPrefix;
+    private Method getSuffixMethod;
+    private Method getRank;
+    private Object permsInstance;
+    private Object userManager;
+    
     public ChatManager(FrizzlenChat plugin) {
         this.plugin = plugin;
         this.playerFormats = new HashMap<>();
@@ -29,27 +41,121 @@ public class ChatManager {
         this.colorPattern = Pattern.compile("(?i)&[0-9A-FK-OR]");
         this.mentionPattern = Pattern.compile("@(\\w+)");
         this.lastMessageTime = new HashMap<>();
+        
+        // Initialize FrizzlenPerms reflection
+        initializePermsReflection();
+    }
+    
+    private void initializePermsReflection() {
+        try {
+            permsClass = Class.forName("com.frizzlenpop.frizzlenperms.FrizzlenPerms");
+            getInstance = permsClass.getMethod("getInstance");
+            permsInstance = getInstance.invoke(null);
+            getUserManager = permsClass.getMethod("getUserManager");
+            userManager = getUserManager.invoke(permsInstance);
+            
+            Class<?> userManagerClass = userManager.getClass();
+            getUser = userManagerClass.getMethod("getUser", UUID.class);
+            
+            Class<?> userClass = Class.forName("com.frizzlenpop.frizzlenperms.user.User");
+            getPrefix = userClass.getMethod("getPrefix");
+            getSuffixMethod = userClass.getMethod("getSuffix");
+            getRank = userClass.getMethod("getRank");
+            
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().info("Successfully initialized FrizzlenPerms reflection");
+            }
+        } catch (Exception e) {
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().warning("Failed to initialize FrizzlenPerms reflection: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
     
     public String formatMessage(Player player, String message, String channel) {
         String format = plugin.getConfigManager().getChannelFormat(channel);
         
-        // Replace placeholders
+        // Replace basic placeholders
         format = format.replace("{channel}", plugin.getChannelManager().getChannelColor(channel) + channel);
         format = format.replace("{player}", player.getName());
-        format = format.replace("{message}", message);
+        format = format.replace("{message}", formatChatColors(player, message));
+        format = format.replace("{world}", player.getWorld().getName());
         
-        // Add prefix and suffix from FrizzlenPerms if available
-        try {
-            Class<?> permsClass = Class.forName("org.frizzlenpop.frizzlenperms.FrizzlenPerms");
-            format = format.replace("{prefix}", getPrefix(player));
-            format = format.replace("{suffix}", getSuffix(player));
-        } catch (ClassNotFoundException e) {
-            format = format.replace("{prefix}", "");
-            format = format.replace("{suffix}", "");
+        // Add FrizzlenPerms placeholders
+        format = format.replace("{prefix}", getPrefix(player));
+        format = format.replace("{suffix}", getSuffix(player));
+        format = format.replace("{rank}", getRankName(player));
+        
+        // Add custom format if set
+        String customFormat = playerFormats.get(player.getUniqueId());
+        if (customFormat != null) {
+            format = format.replace("{format}", customFormat);
         }
         
         return MessageUtils.colorize(format);
+    }
+    
+    private String getPrefix(Player player) {
+        if (permsInstance == null || userManager == null) {
+            return "";
+        }
+        
+        try {
+            Object user = getUser.invoke(userManager, player.getUniqueId());
+            if (user != null) {
+                String prefix = (String) getPrefix.invoke(user);
+                return prefix != null ? MessageUtils.colorize(prefix) : "";
+            }
+        } catch (Exception e) {
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().warning("Failed to get prefix from FrizzlenPerms: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+    
+    private String getSuffix(Player player) {
+        if (permsInstance == null || userManager == null) {
+            return "";
+        }
+        
+        try {
+            Object user = getUser.invoke(userManager, player.getUniqueId());
+            if (user != null) {
+                String suffix = (String) getSuffixMethod.invoke(user);
+                return suffix != null ? MessageUtils.colorize(suffix) : "";
+            }
+        } catch (Exception e) {
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().warning("Failed to get suffix from FrizzlenPerms: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+    
+    private String getRankName(Player player) {
+        if (permsInstance == null || userManager == null) {
+            return "";
+        }
+        
+        try {
+            Object user = getUser.invoke(userManager, player.getUniqueId());
+            if (user != null && getRank != null) {
+                Object rank = getRank.invoke(user);
+                if (rank != null) {
+                    return MessageUtils.colorize(rank.toString());
+                }
+            }
+        } catch (Exception e) {
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().warning("Failed to get rank from FrizzlenPerms: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return "";
     }
     
     public String formatChatColors(Player player, String message) {
@@ -195,44 +301,6 @@ public class ChatManager {
                 playMessageSound(mentioned, "mention");
             }
         }
-    }
-
-    private String getPrefix(Player player) {
-        try {
-            Class<?> permsClass = Class.forName("org.frizzlenpop.frizzlenperms.FrizzlenPerms");
-            Object permsInstance = permsClass.getMethod("getInstance").invoke(null);
-            Object userManager = permsClass.getMethod("getUserManager").invoke(permsInstance);
-            Object user = userManager.getClass().getMethod("getUser", UUID.class).invoke(userManager, player.getUniqueId());
-            
-            if (user != null) {
-                String prefix = (String) user.getClass().getMethod("getPrefix").invoke(user);
-                return prefix != null ? prefix : "";
-            }
-        } catch (Exception e) {
-            if (plugin.getConfigManager().isDebugEnabled()) {
-                plugin.getLogger().warning("Failed to get prefix from FrizzlenPerms: " + e.getMessage());
-            }
-        }
-        return "";
-    }
-
-    private String getSuffix(Player player) {
-        try {
-            Class<?> permsClass = Class.forName("org.frizzlenpop.frizzlenperms.FrizzlenPerms");
-            Object permsInstance = permsClass.getMethod("getInstance").invoke(null);
-            Object userManager = permsClass.getMethod("getUserManager").invoke(permsInstance);
-            Object user = userManager.getClass().getMethod("getUser", UUID.class).invoke(userManager, player.getUniqueId());
-            
-            if (user != null) {
-                String suffix = (String) user.getClass().getMethod("getSuffix").invoke(user);
-                return suffix != null ? suffix : "";
-            }
-        } catch (Exception e) {
-            if (plugin.getConfigManager().isDebugEnabled()) {
-                plugin.getLogger().warning("Failed to get suffix from FrizzlenPerms: " + e.getMessage());
-            }
-        }
-        return "";
     }
 
     public boolean checkCooldown(Player player) {

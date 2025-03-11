@@ -49,6 +49,16 @@ public class ConfigManager {
     }
 
     // Private message settings
+    public String getPrivateMessageSentFormat() {
+        return config.getString("private-messages.format.send", 
+            "&7[&dMe &7-> &d{player}&7] &f{message}");
+    }
+
+    public String getPrivateMessageReceivedFormat() {
+        return config.getString("private-messages.format.receive", 
+            "&7[&d{player} &7-> &dMe&7] &f{message}");
+    }
+
     public boolean isPrivateMessageSoundEnabled() {
         return config.getBoolean("private-messages.sound.enabled", true);
     }
@@ -137,6 +147,19 @@ public class ConfigManager {
     public String getClearChatMessage() {
         return config.getString("chat-features.clear-chat.message", 
             "&aChat has been cleared by {player}");
+    }
+
+    // Mute settings
+    public boolean isMuteBroadcastEnabled() {
+        return config.getBoolean("mute.broadcast-to-staff", true);
+    }
+
+    public int getDefaultMuteDuration() {
+        return config.getInt("mute.default-duration", 60);
+    }
+
+    public String getMuteMessage() {
+        return config.getString("mute.message", "&cYou are muted. Reason: {reason}");
     }
 
     // Message formats

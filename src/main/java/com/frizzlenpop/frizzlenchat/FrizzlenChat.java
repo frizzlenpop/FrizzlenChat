@@ -1,9 +1,7 @@
 package com.frizzlenpop.frizzlenchat;
 
-import com.frizzlenpop.frizzlenchat.commands.ChannelCommand;
-import com.frizzlenpop.frizzlenchat.commands.ClearChatCommand;
+import com.frizzlenpop.frizzlenchat.commands.*;
 import com.frizzlenpop.frizzlenchat.listeners.ChatListener;
-import com.frizzlenpop.frizzlenchat.listeners.PlayerListener;
 import com.frizzlenpop.frizzlenchat.managers.ChatManager;
 import com.frizzlenpop.frizzlenchat.managers.ChannelManager;
 import com.frizzlenpop.frizzlenchat.managers.ConfigManager;
@@ -19,6 +17,10 @@ public class FrizzlenChat extends JavaPlugin {
     private ConfigManager configManager;
     private ChatManager chatManager;
     private ChannelManager channelManager;
+    private MessageCommand messageCommand;
+    private MuteCommand muteCommand;
+    private IgnoreCommand ignoreCommand;
+    private SlowChatCommand slowChatCommand;
     
     @Override
     public void onEnable() {
@@ -48,11 +50,14 @@ public class FrizzlenChat extends JavaPlugin {
         // Initialize managers
         initializeManagers();
         
-        // Register event listeners
-        registerListeners();
+        // Initialize commands
+        initializeCommands();
         
         // Register commands
         registerCommands();
+        
+        // Register listeners
+        registerListeners();
         
         logger.info(ChatColor.GREEN + "FrizzlenChat v" + getDescription().getVersion() + " has been enabled!");
     }
@@ -84,14 +89,34 @@ public class FrizzlenChat extends JavaPlugin {
         channelManager = new ChannelManager(this);
     }
     
-    private void registerListeners() {
-        getServer().getPluginManager().registerEvents(new ChatListener(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+    private void initializeCommands() {
+        messageCommand = new MessageCommand(this);
+        muteCommand = new MuteCommand(this);
+        ignoreCommand = new IgnoreCommand(this);
+        slowChatCommand = new SlowChatCommand(this);
     }
     
     private void registerCommands() {
         getCommand("channel").setExecutor(new ChannelCommand(this));
+        getCommand("msg").setExecutor(messageCommand);
+        getCommand("reply").setExecutor(new ReplyCommand(this, messageCommand));
+        getCommand("ignore").setExecutor(ignoreCommand);
+        getCommand("unignore").setExecutor(ignoreCommand);
+        getCommand("ignorelist").setExecutor(ignoreCommand);
+        getCommand("mute").setExecutor(muteCommand);
+        getCommand("unmute").setExecutor(muteCommand);
+        getCommand("mutelist").setExecutor(muteCommand);
+        getCommand("broadcast").setExecutor(new BroadcastCommand(this));
+        getCommand("chatcolor").setExecutor(new ChatColorCommand(this));
         getCommand("clearchat").setExecutor(new ClearChatCommand(this));
+        getCommand("slowchat").setExecutor(slowChatCommand);
+    }
+    
+    private void registerListeners() {
+        getServer().getPluginManager().registerEvents(
+            new ChatListener(this, muteCommand, ignoreCommand, slowChatCommand), 
+            this
+        );
     }
     
     // Getter methods for managers
