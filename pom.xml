@@ -72,17 +72,15 @@
         </dependency>
         <dependency>
             <groupId>com.frizzlenpop</groupId>
-            <artifactId>FrizzlenPerms</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>C:\Users\Ben\Documents\Development\townai\FrizzlenPerms\target\FrizzlenPerms-1.0-SNAPSHOT.jar</systemPath>
+            <artifactId>FrizzlenEssentials</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.frizzlenpop</groupId>
-            <artifactId>FrizzlenEssentials</artifactId>
+            <groupId>org.frizzlenpop</groupId>
+            <artifactId>FrizzlenPerms</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>C:\Users\Ben\Documents\Development\townai\FrizzlenEssentials\target\FrizzlenEssentials-1.0-SNAPSHOT.jar</systemPath>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

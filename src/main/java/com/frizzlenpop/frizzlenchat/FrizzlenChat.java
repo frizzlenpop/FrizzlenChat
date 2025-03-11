@@ -110,4 +110,6 @@ public class FrizzlenChat extends JavaPlugin {
     public ChannelManager getChannelManager() {
         return channelManager;
     }
+
+
 } 

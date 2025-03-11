@@ -95,4 +95,56 @@ public class ConfigManager {
     public String getMentionFormat() {
         return plugin.getConfig().getString("mention-format", "&e@{player}&f");
     }
-} 
+
+    public boolean isStaffChatSoundEnabled() {
+        return plugin.getConfig().getBoolean("enable-staff-chat-sound", true);
+    }
+
+    public String getStaffChatSound() {
+        return plugin.getConfig().getString("staff-chat-sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
+    }
+
+    public float getStaffChatSoundVolume() {
+        return (float) plugin.getConfig().getDouble("staff-chat-sound-volume", 0.5);
+    }
+
+    public float getStaffChatSoundPitch() {
+        return (float) plugin.getConfig().getDouble("staff-chat-sound-pitch", 1.0);
+    }
+
+    public float getMentionSoundPitch() {
+        return 0.5f;
+    }
+
+    public float getMentionSoundVolume() {
+        return 0.5f;
+    }
+
+    public String getMentionSound() {
+        return "ENTITY_EXPERIENCE_ORB_PICKUP";
+    }
+
+    public boolean isMentionSoundEnabled() {
+        return true;
+    }
+
+    public float getPrivateMessageSoundPitch() {
+        return 0.5f;
+    }
+
+    public float getPrivateMessageSoundVolume() {
+        return 0.5f;
+    }
+
+    public String getPrivateMessageSound() {
+        return "ENTITY_EXPERIENCE_ORB_PICKUP";
+    }
+
+    public boolean isPrivateMessageSoundEnabled() {
+        return true;
+    }
+
+    public int getLocalChatRadius() {
+        return 30;
+    }
+}
