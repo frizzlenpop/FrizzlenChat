@@ -29,108 +29,64 @@ channels:
     radius: -1
     format: "&c[Staff] {prefix}{player}{suffix}&7: &f{message}"
 
-# Chat features
-enable-local-chat: true
-default-local-chat-radius: 100
-
-# Chat sounds
-enable-chat-sound: true
-chat-sound: "ENTITY_EXPERIENCE_ORB_PICKUP"
-chat-sound-volume: 0.5
-chat-sound-pitch: 1.0
-
-# Mentions
-enable-mentions: true
-mention-format: "&e@{player}&f"
-
-# Anti-spam settings
-enable-anti-spam: true
-chat-cooldown-seconds: 3
-
-# Chat Format Settings
-chat:
-  # Global chat format. Available placeholders:
-  # {PREFIX} - Player's rank prefix from FrizzlenPerms
-  # {SUFFIX} - Player's rank suffix from FrizzlenPerms
-  # {PLAYER} - Player's name
-  # {DISPLAYNAME} - Player's display name
-  # {MESSAGE} - The message content
-  # {WORLD} - Player's current world
-  # {CHANNEL} - Current chat channel
-  format: "{PREFIX}{PLAYER}{SUFFIX}&8: &f{MESSAGE}"
-  
-  # Distance for local chat. Set to 0 for global chat
-  local-chat-radius: 0
-  
-  # Minimum time between messages (in seconds)
-  default-cooldown: 1
-  
-  # Maximum message length
-  max-message-length: 256
-
-# Private Messaging
+# Private messaging settings
 private-messages:
-  format:
-    sent: "&7[&cTo &7{PLAYER}&7] &f{MESSAGE}"
-    received: "&7[&cFrom &7{PLAYER}&7] &f{MESSAGE}"
-  sound:
-    enabled: true
-    name: "BLOCK_NOTE_BLOCK_PLING"
-    volume: 1.0
-    pitch: 1.0
-
-# Mute Settings
-mute:
-  # Broadcast mute actions to staff
-  broadcast-to-staff: true
-  # Default mute duration (in minutes) if not specified
-  default-duration: 60
-  # Message shown to muted players
-  message: "&cYou are muted. Reason: {REASON}"
-
-# Chat Filter
-filter:
   enabled: true
-  # Words to filter (case insensitive)
-  blocked-words:
-    - "badword1"
-    - "badword2"
-  # Replacement for filtered words
-  replacement: "****"
-  # Notify staff when filter is triggered
-  notify-staff: true
-  # Action to take when filter is triggered
-  # Options: BLOCK, REPLACE, WARN
-  action: "REPLACE"
-
-# Staff Chat
-staff-chat:
-  # Format for staff chat messages
-  format: "&c[Staff] {PREFIX}{PLAYER}{SUFFIX}&8: &f{MESSAGE}"
-  # Sound to play when staff chat message is received
+  format:
+    send: "&7[&dMe &7-> &d{recipient}&7] &f{message}"
+    receive: "&7[&d{sender} &7-> &dMe&7] &f{message}"
   sound:
     enabled: true
-    name: "BLOCK_NOTE_BLOCK_BELL"
-    volume: 1.0
+    name: "ENTITY_EXPERIENCE_ORB_PICKUP"
+    volume: 0.5
     pitch: 1.0
 
-# Chat Clear
-clear-chat:
-  # Number of blank lines to send when clearing chat
-  lines: 100
-  # Message to show after clearing chat
-  message: "&aChat has been cleared by {PLAYER}"
+# Chat features
+chat-features:
+  local-chat:
+    enabled: true
+    default-radius: 100
+  
+  mentions:
+    enabled: true
+    format: "&e@{player}&f"
+    sound:
+      enabled: true
+      name: "ENTITY_EXPERIENCE_ORB_PICKUP"
+      volume: 0.5
+      pitch: 1.0
+  
+  staff-chat:
+    enabled: true
+    format: "&c[Staff] {prefix}{player}{suffix}&7: &f{message}"
+    sound:
+      enabled: true
+      name: "ENTITY_EXPERIENCE_ORB_PICKUP"
+      volume: 0.5
+      pitch: 1.0
+  
+  anti-spam:
+    enabled: true
+    cooldown: 3  # seconds
+    message: "&cYou must wait {time} seconds before chatting again."
+  
+  clear-chat:
+    lines: 100
+    message: "&aChat has been cleared by {player}"
 
-# Slow Mode
-slow-mode:
-  # Message shown when slow mode is enabled
-  enabled-message: "&cSlow mode is now enabled. You can chat every {SECONDS} seconds."
-  # Message shown when slow mode is disabled
-  disabled-message: "&aSlow mode has been disabled."
-  # Message shown when trying to chat too quickly
-  cooldown-message: "&cYou must wait {REMAINING} seconds before chatting again."
+# Message formats
+formats:
+  no-permission: "&cYou don't have permission to do that!"
+  player-only: "&cThis command can only be used by players!"
+  player-not-found: "&cPlayer not found!"
+  invalid-channel: "&cThat channel does not exist!"
+  channel-join: "&aYou have joined the {channel} channel."
+  channel-leave: "&aYou have left your current channel and joined {channel}."
+  channel-list-header: "&aAvailable channels:"
+  channel-list-format: "{color}{channel}{current}"
+  channel-current-suffix: " &e(Current)"
 
-# Debug Settings
+# Debug settings
 debug:
   enabled: false
-  log-level: "INFO" 
+  log-level: "INFO"  # INFO, WARNING, SEVERE 

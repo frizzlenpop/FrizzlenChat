@@ -87,6 +87,7 @@ permissions:
     children:
       frizzlenchat.command.channel: true
       frizzlenchat.command.clearchat: true
+      frizzlenchat.command.clearchat.all: true
   
   frizzlenchat.channel.*:
     description: Gives access to all chat channels
@@ -107,7 +108,11 @@ permissions:
     default: true
   
   frizzlenchat.command.clearchat:
-    description: Allows using the clearchat command
+    description: Allows using the clearchat command for yourself
+    default: true
+  
+  frizzlenchat.command.clearchat.all:
+    description: Allows using the clearchat command for all players
     default: op
   
   frizzlenchat.channel.global:

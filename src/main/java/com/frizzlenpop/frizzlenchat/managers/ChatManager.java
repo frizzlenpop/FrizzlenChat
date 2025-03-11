@@ -1,6 +1,7 @@
 package com.frizzlenpop.frizzlenchat.managers;
 
 import com.frizzlenpop.frizzlenchat.FrizzlenChat;
+import com.frizzlenpop.frizzlenchat.utils.MessageUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ public class ChatManager {
     private final Map<UUID, ChatColor> playerColors;
     private final Pattern colorPattern;
     private final Pattern mentionPattern;
+    private final Map<UUID, Long> lastMessageTime;
     
     public ChatManager(FrizzlenChat plugin) {
         this.plugin = plugin;
@@ -26,10 +28,11 @@ public class ChatManager {
         this.playerColors = new HashMap<>();
         this.colorPattern = Pattern.compile("(?i)&[0-9A-FK-OR]");
         this.mentionPattern = Pattern.compile("@(\\w+)");
+        this.lastMessageTime = new HashMap<>();
     }
     
     public String formatMessage(Player player, String message, String channel) {
-        String format = "&7[{channel}] {prefix}{player}{suffix}&7: &f{message}";
+        String format = plugin.getConfigManager().getChannelFormat(channel);
         
         // Replace placeholders
         format = format.replace("{channel}", plugin.getChannelManager().getChannelColor(channel) + channel);
@@ -46,8 +49,7 @@ public class ChatManager {
             format = format.replace("{suffix}", "");
         }
         
-        // Translate color codes
-        return ChatColor.translateAlternateColorCodes('&', format);
+        return MessageUtils.colorize(format);
     }
     
     public String formatChatColors(Player player, String message) {
@@ -98,8 +100,7 @@ public class ChatManager {
     
     public boolean isInRange(Player sender, Player receiver) {
         // If local chat is disabled, always return true
-        int radius = plugin.getConfigManager().getLocalChatRadius();
-        if (radius <= 0) {
+        if (!plugin.getConfigManager().isLocalChatEnabled()) {
             return true;
         }
         
@@ -111,49 +112,58 @@ public class ChatManager {
         // Check distance between players
         Location senderLoc = sender.getLocation();
         Location receiverLoc = receiver.getLocation();
-        return senderLoc.distance(receiverLoc) <= radius;
+        return senderLoc.distance(receiverLoc) <= plugin.getConfigManager().getLocalChatRadius();
     }
     
     public void playMessageSound(Player player, String soundType) {
-        Sound sound;
-        float volume;
-        float pitch;
-        
-        switch (soundType.toLowerCase()) {
-            case "private":
-                if (!plugin.getConfigManager().isPrivateMessageSoundEnabled()) return;
-                sound = Sound.valueOf(plugin.getConfigManager().getPrivateMessageSound());
-                volume = plugin.getConfigManager().getPrivateMessageSoundVolume();
-                pitch = plugin.getConfigManager().getPrivateMessageSoundPitch();
-                break;
-            case "mention":
-                if (!plugin.getConfigManager().isMentionSoundEnabled()) return;
-                sound = Sound.valueOf(plugin.getConfigManager().getMentionSound());
-                volume = plugin.getConfigManager().getMentionSoundVolume();
-                pitch = plugin.getConfigManager().getMentionSoundPitch();
-                break;
-            case "staff":
-                if (!plugin.getConfigManager().isStaffChatSoundEnabled()) return;
-                sound = Sound.valueOf(plugin.getConfigManager().getStaffChatSound());
-                volume = plugin.getConfigManager().getStaffChatSoundVolume();
-                pitch = plugin.getConfigManager().getStaffChatSoundPitch();
-                break;
-            default:
-                return;
+        try {
+            String soundName;
+            float volume;
+            float pitch;
+
+            switch (soundType.toLowerCase()) {
+                case "private":
+                    if (!plugin.getConfigManager().isPrivateMessageSoundEnabled()) return;
+                    soundName = plugin.getConfigManager().getPrivateMessageSound();
+                    volume = plugin.getConfigManager().getPrivateMessageSoundVolume();
+                    pitch = plugin.getConfigManager().getPrivateMessageSoundPitch();
+                    break;
+                case "mention":
+                    if (!plugin.getConfigManager().isMentionSoundEnabled()) return;
+                    soundName = plugin.getConfigManager().getMentionSoundName();
+                    volume = plugin.getConfigManager().getMentionSoundVolume();
+                    pitch = plugin.getConfigManager().getMentionSoundPitch();
+                    break;
+                case "staff":
+                    if (!plugin.getConfigManager().isStaffChatSoundEnabled()) return;
+                    soundName = plugin.getConfigManager().getStaffChatSound();
+                    volume = plugin.getConfigManager().getStaffChatSoundVolume();
+                    pitch = plugin.getConfigManager().getStaffChatSoundPitch();
+                    break;
+                default:
+                    return;
+            }
+
+            Sound sound = Sound.valueOf(soundName);
+            player.playSound(player.getLocation(), sound, volume, pitch);
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning("Invalid sound name for " + soundType + " chat sound");
         }
-        
-        player.playSound(player.getLocation(), sound, volume, pitch);
     }
     
     public void clearChat(Player player) {
-        for (int i = 0; i < 100; i++) {
+        int lines = plugin.getConfigManager().getClearChatLines();
+        for (int i = 0; i < lines; i++) {
             player.sendMessage("");
         }
     }
 
     public void clearChatForAll() {
+        int lines = plugin.getConfigManager().getClearChatLines();
         for (Player player : plugin.getServer().getOnlinePlayers()) {
-            clearChat(player);
+            for (int i = 0; i < lines; i++) {
+                player.sendMessage("");
+            }
         }
     }
 
@@ -172,36 +182,82 @@ public class ChatManager {
     }
 
     public void handleMentions(String message, Set<Player> recipients) {
+        if (!plugin.getConfigManager().isMentionsEnabled()) {
+            return;
+        }
+
         Matcher matcher = mentionPattern.matcher(message);
         while (matcher.find()) {
             String playerName = matcher.group(1);
             Player mentioned = plugin.getServer().getPlayer(playerName);
             
             if (mentioned != null && recipients.contains(mentioned)) {
-                playMentionSound(mentioned);
+                playMessageSound(mentioned, "mention");
             }
         }
     }
 
-    private void playMentionSound(Player player) {
-        try {
-            Sound sound = Sound.valueOf("ENTITY_EXPERIENCE_ORB_PICKUP");
-            player.playSound(player.getLocation(), 
-                sound,
-                0.5f,  // Default volume
-                1.0f); // Default pitch
-        } catch (IllegalArgumentException e) {
-            plugin.getLogger().warning("Invalid sound name: ENTITY_EXPERIENCE_ORB_PICKUP");
-        }
-    }
-
     private String getPrefix(Player player) {
-        // This would integrate with FrizzlenPerms
-        return ""; // Placeholder until FrizzlenPerms integration is implemented
+        try {
+            Class<?> permsClass = Class.forName("org.frizzlenpop.frizzlenperms.FrizzlenPerms");
+            Object permsInstance = permsClass.getMethod("getInstance").invoke(null);
+            Object userManager = permsClass.getMethod("getUserManager").invoke(permsInstance);
+            Object user = userManager.getClass().getMethod("getUser", UUID.class).invoke(userManager, player.getUniqueId());
+            
+            if (user != null) {
+                String prefix = (String) user.getClass().getMethod("getPrefix").invoke(user);
+                return prefix != null ? prefix : "";
+            }
+        } catch (Exception e) {
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().warning("Failed to get prefix from FrizzlenPerms: " + e.getMessage());
+            }
+        }
+        return "";
     }
 
     private String getSuffix(Player player) {
-        // This would integrate with FrizzlenPerms
-        return ""; // Placeholder until FrizzlenPerms integration is implemented
+        try {
+            Class<?> permsClass = Class.forName("org.frizzlenpop.frizzlenperms.FrizzlenPerms");
+            Object permsInstance = permsClass.getMethod("getInstance").invoke(null);
+            Object userManager = permsClass.getMethod("getUserManager").invoke(permsInstance);
+            Object user = userManager.getClass().getMethod("getUser", UUID.class).invoke(userManager, player.getUniqueId());
+            
+            if (user != null) {
+                String suffix = (String) user.getClass().getMethod("getSuffix").invoke(user);
+                return suffix != null ? suffix : "";
+            }
+        } catch (Exception e) {
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().warning("Failed to get suffix from FrizzlenPerms: " + e.getMessage());
+            }
+        }
+        return "";
+    }
+
+    public boolean checkCooldown(Player player) {
+        if (!plugin.getConfigManager().isAntiSpamEnabled() || 
+            player.hasPermission("frizzlenchat.bypass.cooldown")) {
+            return true;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        long lastTime = lastMessageTime.getOrDefault(player.getUniqueId(), 0L);
+        int cooldown = plugin.getConfigManager().getChatCooldown() * 1000; // Convert to milliseconds
+
+        if (currentTime - lastTime < cooldown) {
+            int remainingSeconds = (int) ((cooldown - (currentTime - lastTime)) / 1000) + 1;
+            String message = plugin.getConfigManager().getCooldownMessage()
+                .replace("{time}", String.valueOf(remainingSeconds));
+            player.sendMessage(MessageUtils.colorize(message));
+            return false;
+        }
+
+        lastMessageTime.put(player.getUniqueId(), currentTime);
+        return true;
+    }
+
+    public void removePlayerCooldown(UUID playerId) {
+        lastMessageTime.remove(playerId);
     }
 } 

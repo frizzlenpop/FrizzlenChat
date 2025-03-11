@@ -23,6 +23,13 @@ public class ChatListener implements Listener {
         }
 
         Player player = event.getPlayer();
+
+        // Check chat cooldown
+        if (!plugin.getChatManager().checkCooldown(player)) {
+            event.setCancelled(true);
+            return;
+        }
+
         String channel = plugin.getChannelManager().getPlayerChannel(player);
 
         // If player is not in a channel, put them in the default channel
@@ -35,12 +42,12 @@ public class ChatListener implements Listener {
         String formattedMessage = plugin.getChatManager().formatMessage(player, event.getMessage(), channel);
         
         // Handle local chat
-        if (plugin.getChannelManager().getChannelRadius(channel) > 0) {
+        int radius = plugin.getChannelManager().getChannelRadius(channel);
+        if (radius > 0) {
             // Get players in range
             event.getRecipients().clear();
             event.getRecipients().addAll(
-                plugin.getChatManager().getLocalRecipients(player, 
-                    plugin.getChannelManager().getChannelRadius(channel))
+                plugin.getChatManager().getLocalRecipients(player, radius)
             );
         } else {
             // Global chat - only send to players in the same channel
@@ -66,6 +73,8 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        plugin.getChannelManager().handlePlayerQuit(event.getPlayer());
+        Player player = event.getPlayer();
+        plugin.getChannelManager().handlePlayerQuit(player);
+        plugin.getChatManager().removePlayerCooldown(player.getUniqueId());
     }
 } 

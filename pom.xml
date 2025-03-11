@@ -61,6 +61,10 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>local-maven-repo</id>
+            <url>file:///${project.basedir}/local-maven-repo</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -71,18 +75,18 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.frizzlenpop</groupId>
+            <groupId>org.frizzlenpop</groupId>
             <artifactId>FrizzlenPerms</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>C:\Users\Ben\Documents\Development\townai\FrizzlenPerms\target\FrizzlenPerms-1.0-SNAPSHOT.jar</systemPath>
+            <systemPath>C:/Users/Ben/Documents/Development/townai/FrizzlenPerms/target/FrizzlenPerms-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.frizzlenpop</groupId>
-            <artifactId>FrizzlenEssentials</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>FrizzlenEsentials</artifactId>
+            <version>1.0.0</version>
             <scope>system</scope>
-            <systemPath>C:\Users\Ben\Documents\Development\townai\FrizzlenEssentials\target\FrizzlenEssentials-1.0-SNAPSHOT.jar</systemPath>
+            <systemPath>C:/Users/Ben/Documents/Development/townai/FrizzlenEssentials/target/frizzlenessentials-1.0.0.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
