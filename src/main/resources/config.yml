@@ -1,0 +1,136 @@
+# FrizzlenChat Configuration
+
+# Default chat channel for new players
+default-channel: "global"
+
+# Chat channels configuration
+channels:
+  global:
+    permission: "frizzlenchat.channel.global"
+    color: "&f"
+    radius: -1  # -1 means no radius limit (server-wide)
+    format: "&7[{channel}] {prefix}{player}{suffix}&7: &f{message}"
+  
+  local:
+    permission: "frizzlenchat.channel.local"
+    color: "&e"
+    radius: 100
+    format: "&e[Local] {prefix}{player}{suffix}&7: &f{message}"
+  
+  trade:
+    permission: "frizzlenchat.channel.trade"
+    color: "&6"
+    radius: -1
+    format: "&6[Trade] {prefix}{player}{suffix}&7: &f{message}"
+  
+  staff:
+    permission: "frizzlenchat.channel.staff"
+    color: "&c"
+    radius: -1
+    format: "&c[Staff] {prefix}{player}{suffix}&7: &f{message}"
+
+# Chat features
+enable-local-chat: true
+default-local-chat-radius: 100
+
+# Chat sounds
+enable-chat-sound: true
+chat-sound: "ENTITY_EXPERIENCE_ORB_PICKUP"
+chat-sound-volume: 0.5
+chat-sound-pitch: 1.0
+
+# Mentions
+enable-mentions: true
+mention-format: "&e@{player}&f"
+
+# Anti-spam settings
+enable-anti-spam: true
+chat-cooldown-seconds: 3
+
+# Chat Format Settings
+chat:
+  # Global chat format. Available placeholders:
+  # {PREFIX} - Player's rank prefix from FrizzlenPerms
+  # {SUFFIX} - Player's rank suffix from FrizzlenPerms
+  # {PLAYER} - Player's name
+  # {DISPLAYNAME} - Player's display name
+  # {MESSAGE} - The message content
+  # {WORLD} - Player's current world
+  # {CHANNEL} - Current chat channel
+  format: "{PREFIX}{PLAYER}{SUFFIX}&8: &f{MESSAGE}"
+  
+  # Distance for local chat. Set to 0 for global chat
+  local-chat-radius: 0
+  
+  # Minimum time between messages (in seconds)
+  default-cooldown: 1
+  
+  # Maximum message length
+  max-message-length: 256
+
+# Private Messaging
+private-messages:
+  format:
+    sent: "&7[&cTo &7{PLAYER}&7] &f{MESSAGE}"
+    received: "&7[&cFrom &7{PLAYER}&7] &f{MESSAGE}"
+  sound:
+    enabled: true
+    name: "BLOCK_NOTE_BLOCK_PLING"
+    volume: 1.0
+    pitch: 1.0
+
+# Mute Settings
+mute:
+  # Broadcast mute actions to staff
+  broadcast-to-staff: true
+  # Default mute duration (in minutes) if not specified
+  default-duration: 60
+  # Message shown to muted players
+  message: "&cYou are muted. Reason: {REASON}"
+
+# Chat Filter
+filter:
+  enabled: true
+  # Words to filter (case insensitive)
+  blocked-words:
+    - "badword1"
+    - "badword2"
+  # Replacement for filtered words
+  replacement: "****"
+  # Notify staff when filter is triggered
+  notify-staff: true
+  # Action to take when filter is triggered
+  # Options: BLOCK, REPLACE, WARN
+  action: "REPLACE"
+
+# Staff Chat
+staff-chat:
+  # Format for staff chat messages
+  format: "&c[Staff] {PREFIX}{PLAYER}{SUFFIX}&8: &f{MESSAGE}"
+  # Sound to play when staff chat message is received
+  sound:
+    enabled: true
+    name: "BLOCK_NOTE_BLOCK_BELL"
+    volume: 1.0
+    pitch: 1.0
+
+# Chat Clear
+clear-chat:
+  # Number of blank lines to send when clearing chat
+  lines: 100
+  # Message to show after clearing chat
+  message: "&aChat has been cleared by {PLAYER}"
+
+# Slow Mode
+slow-mode:
+  # Message shown when slow mode is enabled
+  enabled-message: "&cSlow mode is now enabled. You can chat every {SECONDS} seconds."
+  # Message shown when slow mode is disabled
+  disabled-message: "&aSlow mode has been disabled."
+  # Message shown when trying to chat too quickly
+  cooldown-message: "&cYou must wait {REMAINING} seconds before chatting again."
+
+# Debug Settings
+debug:
+  enabled: false
+  log-level: "INFO" 

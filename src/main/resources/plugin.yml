@@ -1,7 +1,135 @@
 name: FrizzlenChat
-version: '1.0-SNAPSHOT'
-main: org.frizzlenpop.frizzlenChat.FrizzlenChat
-api-version: '1.21'
-load: STARTUP
-authors: [ frizzlenpop ]
-description: A Plugin for Chatting
+version: '1.0'
+main: com.frizzlenpop.frizzlenchat.FrizzlenChat
+api-version: '1.20'
+depend: [FrizzlenEssentials]
+softdepend: [FrizzlenPerms]
+description: A comprehensive chat management plugin for the Frizzlen network
+author: FrizzlenPop
+
+commands:
+  channel:
+    description: Manage chat channels
+    usage: /channel <join|leave|list> [channel]
+    aliases: [ch]
+    permission: frizzlenchat.command.channel
+  msg:
+    description: Send a private message to a player
+    usage: /msg <player> <message>
+    aliases: [m, tell, w, whisper]
+    permission: frizzlenchat.msg
+  reply:
+    description: Reply to the last private message
+    usage: /reply <message>
+    aliases: [r]
+    permission: frizzlenchat.reply
+  ignore:
+    description: Ignore messages from a player
+    usage: /ignore <player>
+    permission: frizzlenchat.ignore
+  unignore:
+    description: Stop ignoring messages from a player
+    usage: /unignore <player>
+    permission: frizzlenchat.unignore
+  ignorelist:
+    description: List all players you are ignoring
+    usage: /ignorelist
+    permission: frizzlenchat.ignorelist
+  mute:
+    description: Mute a player
+    usage: /mute <player> [duration] [reason]
+    permission: frizzlenchat.mute
+  unmute:
+    description: Unmute a player
+    usage: /unmute <player>
+    permission: frizzlenchat.unmute
+  mutelist:
+    description: List all muted players
+    usage: /mutelist
+    permission: frizzlenchat.mutelist
+  broadcast:
+    description: Broadcast a message to all players
+    usage: /broadcast <message>
+    permission: frizzlenchat.broadcast
+  chatcolor:
+    description: Set your chat color
+    usage: /chatcolor <color>
+    permission: frizzlenchat.chatcolor
+  clearchat:
+    description: Clear the chat
+    usage: /clearchat [all]
+    aliases: [cc]
+    permission: frizzlenchat.command.clearchat
+  slowchat:
+    description: Set chat slowmode
+    usage: /slowchat <seconds|off>
+    permission: frizzlenchat.slowchat
+  staffchat:
+    description: Toggle staff chat mode
+    usage: /staffchat [message]
+    aliases: [sc]
+    permission: frizzlenchat.staffchat
+  chatreload:
+    description: Reload the chat plugin configuration
+    usage: /chatreload
+    permission: frizzlenchat.reload
+
+permissions:
+  frizzlenchat.*:
+    description: Gives access to all FrizzlenChat features
+    children:
+      frizzlenchat.command.*: true
+      frizzlenchat.channel.*: true
+      frizzlenchat.bypass.*: true
+  
+  frizzlenchat.command.*:
+    description: Gives access to all FrizzlenChat commands
+    children:
+      frizzlenchat.command.channel: true
+      frizzlenchat.command.clearchat: true
+  
+  frizzlenchat.channel.*:
+    description: Gives access to all chat channels
+    children:
+      frizzlenchat.channel.global: true
+      frizzlenchat.channel.local: true
+      frizzlenchat.channel.trade: true
+      frizzlenchat.channel.staff: true
+  
+  frizzlenchat.bypass.*:
+    description: Gives access to all bypass permissions
+    children:
+      frizzlenchat.bypass.cooldown: true
+      frizzlenchat.bypass.filter: true
+  
+  frizzlenchat.command.channel:
+    description: Allows using the channel command
+    default: true
+  
+  frizzlenchat.command.clearchat:
+    description: Allows using the clearchat command
+    default: op
+  
+  frizzlenchat.channel.global:
+    description: Allows access to the global chat channel
+    default: true
+  
+  frizzlenchat.channel.local:
+    description: Allows access to the local chat channel
+    default: true
+  
+  frizzlenchat.channel.trade:
+    description: Allows access to the trade chat channel
+    default: true
+  
+  frizzlenchat.channel.staff:
+    description: Allows access to the staff chat channel
+    default: op
+  
+  frizzlenchat.bypass.cooldown:
+    description: Bypasses chat cooldown restrictions
+    default: op
+  
+  frizzlenchat.bypass.filter:
+    description: Bypasses chat filter restrictions
+    default: op
